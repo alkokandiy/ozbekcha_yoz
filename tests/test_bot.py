@@ -152,3 +152,48 @@ class TestStaticTexts(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipIf(bot_module is None, "aiogram not installed")
+class TestDonation(unittest.TestCase):
+    """The card number lives in a deployment variable, never in the repo:
+    git history is permanent, so a number committed once stays readable."""
+
+    def _text(self, card, name=""):
+        saved = (bot_module.DONATION_CARD, bot_module.DONATION_NAME)
+        bot_module.DONATION_CARD, bot_module.DONATION_NAME = card, name
+        try:
+            return bot_module.donation_text()
+        finally:
+            bot_module.DONATION_CARD, bot_module.DONATION_NAME = saved
+
+    def test_sixteen_digits_are_grouped_in_fours(self):
+        text = self._text("8600123456789012")
+        self.assertIn("8600 1234 5678 9012", text)
+
+    def test_spaces_and_dashes_in_the_variable_are_tolerated(self):
+        for written in ("8600 1234 5678 9012", "8600-1234-5678-9012"):
+            self.assertIn("8600 1234 5678 9012", self._text(written))
+
+    def test_holder_name_is_included_when_set(self):
+        self.assertIn("Al-Kokandiy", self._text("8600123456789012", "Al-Kokandiy"))
+
+    def test_unset_card_does_not_apologise_for_the_bot(self):
+        text = self._text("")
+        self.assertIn("bepul", text)
+        self.assertNotIn("8600", text)
+
+    def test_wrong_length_is_treated_as_unset(self):
+        # A typo in the Railway variable must not publish a broken number.
+        for junk in ("8600123456789", "860012345678901234", "card", "0000"):
+            self.assertNotIn("<code>", self._text(junk), junk)
+
+    def test_no_card_number_is_hardcoded_anywhere(self):
+        import pathlib
+
+        root = pathlib.Path(__file__).resolve().parent.parent
+        import re
+
+        for path in (root / "bot.py", root / "docs" / "index.html"):
+            found = re.findall(r"\b\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4}\b", path.read_text())
+            self.assertEqual(found, [], f"{path.name} contains something card-shaped")

@@ -41,6 +41,14 @@ MAX_MESSAGE = 4096
 #: The FAQ page, served from docs/ by GitHub Pages.
 SITE_URL = "https://alkokandiy.github.io/ozbekcha_yoz/"
 
+#: A 16-digit card number, set as a deployment variable so it never enters
+#: the repository. Git history is permanent: a number committed once stays
+#: readable in the history even after it is deleted from the file.
+DONATION_CARD = (os.environ.get("DONATION_CARD") or "").strip()
+
+#: Optional holder name, which card-to-card transfers sometimes ask for.
+DONATION_NAME = (os.environ.get("DONATION_NAME") or "").strip()
+
 START_TEXT = (
     f"{hbold('Özbekcha Yoz')}\n\n"
     "Eski imlodagi matnni yuboring — yangi özbek lotin alifbosiga "
@@ -78,6 +86,26 @@ HELP_TEXT = (
     "dasturçida şunça matnni saqlab turadigan server olişga pul yöq."
 )
 
+def donation_text() -> str:
+    """The reply to /homiylik, or an apology when nothing is configured."""
+    digits = re.sub(r"\D", "", DONATION_CARD)
+    if len(digits) != 16:
+        return (
+            "Hozirça homiylik uçun karta qöyilmagan. "
+            "Bot baribir bepul — hiç narsa özgarmaydi."
+        )
+    grouped = " ".join(digits[i : i + 4] for i in range(0, 16, 4))
+    lines = [
+        "Bot bepul va şunday qoladi. Homiylik hiç narsani oçmaydi va "
+        "navbat bermaydi — faqat server haqini qoplaşga yordam beradi.\n",
+        hcode(grouped),
+    ]
+    if DONATION_NAME:
+        lines.append(f"\n{DONATION_NAME}")
+    lines.append("\nRahmat.")
+    return "\n".join(lines)
+
+
 dp = Dispatcher()
 
 
@@ -90,6 +118,11 @@ async def on_start(message: Message) -> None:
 @dp.message(Command("help", "yordam"))
 async def on_help(message: Message) -> None:
     await message.answer(HELP_TEXT)
+
+
+@dp.message(Command("homiylik", "donat"))
+async def on_donate(message: Message) -> None:
+    await message.answer(donation_text())
 
 
 @dp.message(F.text)

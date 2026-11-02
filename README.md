@@ -47,9 +47,18 @@ word nobody asked it to touch.
    and pick the repo.
 4. Open the service → **Variables** → add:
 
-   | Name | Value |
-   |---|---|
-   | `BOT_TOKEN` | the token from BotFather |
+   | Name | Value | |
+   |---|---|---|
+   | `BOT_TOKEN` | the token from BotFather | required |
+   | `DONATION_CARD` | 16 digits, for `/homiylik` | optional |
+   | `DONATION_NAME` | card holder, shown with the number | optional |
+
+   The card number is a variable rather than a line in this repository
+   because git history is permanent: a number committed once stays readable
+   in the history after it is deleted from the file. Set in Railway, it can
+   also be changed or removed without a deploy of its own. If it is missing
+   or not 16 digits, `/homiylik` says donations are not set up instead of
+   printing something broken.
 
 5. Deploy. The `Procfile` runs it as a `worker`, so no public domain, no port
    and no health check are needed — the bot connects out to Telegram by long

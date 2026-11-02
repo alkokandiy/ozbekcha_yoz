@@ -227,26 +227,24 @@ of Cyrillic text that has to move eventually.
 - **A Dockerfile.** Railway is fine, but one file makes the bot portable to
   any host, which matters if free tiers change.
 
-### 4.1 Donations
+### 4.1 Donations (done)
 
-A `/homiylik` (or `/donat`) command, as the only thing the bot ever asks for.
-Two options, and they are not equivalent:
+`/homiylik` (and `/donat`) prints a 16-digit card number read from the
+`DONATION_CARD` deployment variable, grouped in fours and sent as a code
+block so it can be tapped to copy. `DONATION_NAME` adds the holder name that
+card-to-card transfers sometimes ask for.
 
-- **A payment page** (tirikchilik.uz or similar) — a link, no personal data in
-  the bot, and the page handles its own receipts.
-- **A card number**, 16 digits, printed on request. Simplest thing that works,
-  and normal practice in Uzbekistan.
+The number is never in the repository. Git history is permanent — a number
+committed once stays readable in the history after being deleted from the
+file — and a deployment variable can be rotated without a commit. A value
+that is not 16 digits is treated as unset, so a typo cannot publish a broken
+number. A test asserts nothing card-shaped appears in `bot.py` or the FAQ
+page.
 
-If it is a card number: put it in an environment variable
-(`DONATION_CARD`), never in the source, so the repo stays public and the
-number can change without a commit — and use a card that is fine to publish,
-since anything a bot prints is effectively public. A card number alone can
-only *receive*. Nothing else belongs anywhere near this bot: no expiry date,
-no CVV, no SMS codes, and no form that collects them. The bot's answer to
-`/homiylik` should be the number and nothing more.
-
-Everything else stays free with no limits. The point of donations is to cover
-a server if the free tier ever ends, not to gate anything.
+The reply states that homiylik unlocks nothing and gives no priority. That
+sentence is what keeps asking from reading as a soft paywall, and it stays
+true: everything is free with no limits, and donations exist only to cover a
+server if the free tier ends.
 
 ### 4.2 The privacy line
 
