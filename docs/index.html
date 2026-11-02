@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Özbekça Yoz — savollar</title>
+<meta name="description" content="Eski imlodagi matnni yangi özbek lotin alifbosiga ögiradigan Telegram bot. Tez-tez beriladigan savollar.">
+<meta property="og:title" content="Özbekça Yoz">
+<meta property="og:description" content="Eski imlodagi matnni yangi özbek lotin alifbosiga ögiradigan Telegram bot.">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo-mark-tile.svg" type="image/svg+xml">
+<style>
+  :root {
+    --teal: #11857F;
+    --teal-deep: #0B5F5A;
+    --cream: #F7F1E3;
+    --gold: #D9A441;
+    --bg: #FBFAF6;
+    --card: #FFFFFF;
+    --ink: #1C2321;
+    --ink-soft: #5A6663;
+    --line: #E4E0D4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111514;
+      --card: #191E1D;
+      --ink: #ECE8DC;
+      --ink-soft: #9BA6A3;
+      --line: #2A312F;
+      --teal: #2FA79F;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 48px 20px 72px; }
+  header { text-align: center; margin-bottom: 40px; }
+  .mark { width: 88px; height: 88px; }
+  h1 { font-size: 30px; font-weight: 600; margin: 18px 0 6px; letter-spacing: -0.2px; }
+  .tagline { color: var(--ink-soft); margin: 0 0 22px; font-size: 17px; }
+  .cta {
+    display: inline-block; background: var(--teal); color: #fff; text-decoration: none;
+    padding: 12px 26px; border-radius: 999px; font-weight: 500; font-size: 16px;
+  }
+  .cta:hover { background: var(--teal-deep); }
+  .demo {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; margin: 34px 0 40px; font-size: 15.5px;
+  }
+  .demo div { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
+  .demo .old { color: var(--ink-soft); }
+  .demo .new { color: var(--teal); font-weight: 500; }
+  .demo .arr { color: var(--gold); }
+  h2 { font-size: 13px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink-soft);
+       font-weight: 600; margin: 36px 0 12px; }
+  details {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 0 20px; margin-bottom: 10px;
+  }
+  details[open] { border-color: var(--teal); }
+  summary {
+    cursor: pointer; padding: 16px 0; font-weight: 500; list-style: none;
+    display: flex; justify-content: space-between; align-items: center; gap: 14px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; color: var(--teal); font-size: 22px; line-height: 1; }
+  details[open] summary::after { content: "−"; }
+  details p { margin: 0 0 16px; color: var(--ink-soft); }
+  details p:first-of-type { margin-top: -2px; }
+  details strong { color: var(--ink); font-weight: 500; }
+  code {
+    font: 400 14.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px;
+  }
+  .soon { color: var(--gold); font-weight: 500; }
+  a { color: var(--teal); }
+  @media (max-width: 520px) {
+    .wrap { padding: 32px 16px 56px; }
+    h1 { font-size: 26px; }
+    .demo div { grid-template-columns: 1fr; justify-items: center; gap: 4px; }
+    .demo .arr { transform: rotate(90deg); }
+  }
+  footer { margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--line);
+           color: var(--ink-soft); font-size: 14.5px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <svg class="mark" viewBox="0 0 512 512" role="img" aria-label="Özbekça Yoz">
+    <circle cx="256" cy="256" r="256" fill="#11857F"/>
+    <circle cx="256" cy="309" r="110" fill="none" stroke="#F7F1E3" stroke-width="40"/>
+    <g fill="#D9A441">
+      <rect x="181" y="102" width="48" height="48"/>
+      <rect x="181" y="102" width="48" height="48" transform="rotate(45 205 126)"/>
+      <rect x="283" y="102" width="48" height="48"/>
+      <rect x="283" y="102" width="48" height="48" transform="rotate(45 307 126)"/>
+    </g>
+  </svg>
+  <h1>Özbekça Yoz</h1>
+  <p class="tagline">Eski imlodagi matnni yangi özbek lotin alifbosiga ögiradi.</p>
+  <a class="cta" href="https://t.me/ozbekcha_yoz_bot">Telegramda oçiş</a>
+</header>
+
+<div class="demo">
+  <div>
+    <span class="old">O'zbekiston shahri</span>
+    <span class="arr">&rarr;</span>
+    <span class="new">Özbekiston şahri</span>
+  </div>
+</div>
+
+<h2>Savollar</h2>
+
+<details open>
+  <summary>Bu bot nima qiladi?</summary>
+  <p>Matningizdagi tört belgini almaştiradi: <code>O'&rarr;Ö</code>,
+  <code>G'&rarr;Ğ</code>, <code>Sh&rarr;Ş</code>, <code>Ch&rarr;Ç</code>.
+  Katta-kiçik harf saqlanadi — <code>SHARAF</code> &rarr; <code>ŞARAF</code>,
+  <code>Sharaf</code> &rarr; <code>Şaraf</code>.</p>
+  <p>Botga matn yuborasiz, javobida <strong>faqat ögirilgan matn</strong> keladi.
+  Salomlaşiş ham, izoh ham yöq.</p>
+</details>
+
+<details>
+  <summary>Boşqa narsalar özgaradimi?</summary>
+  <p>Yöq. Sözlar, grammatika, tiniş belgilari, qatorlar, böşliqlar, emojilar —
+  hammasi siz yuborgan holida qaytadi. Uzun maqolani ham tinçgina taşlayvering.</p>
+  <p>O yoki G dan keyin kelmagan tutuq belgisi tegilmaydi:
+  <code>san'at</code> va <code>qal'a</code> öz holiça qoladi.</p>
+</details>
+
+<details>
+  <summary>Havolalarim buzilmaydimi?</summary>
+  <p>Buzilmaydi. <code>sch</code> va <code>ch</code> havolalarda tez-tez
+  uçraydi, şuning uçun <strong>havola, poçta manzili va @nom tegilmaydi</strong> —
+  ularda bitta harf özgarsa, havola öladi.</p>
+  <p><code>#xeştag</code> esa ögiriladi: u manzil emas, siz yozgan söz, va
+  Telegram <code>#çoyxona</code> ni bemalol qabul qiladi.</p>
+</details>
+
+<details>
+  <summary>Har qanday çatda işlataolamanmi?</summary>
+  <p>Ha. Istalgan çatda <code>@ozbekcha_yoz_bot matn</code> deb yozsangiz,
+  botga ötmasdan öşa yerda ögirib yuboradi.</p>
+  <p>Rasm yuborib, tagiga izoh yozsangiz — izoh ham ögiriladi.</p>
+</details>
+
+<details>
+  <summary>Matnlarim saqlanadimi?</summary>
+  <p><strong>Hiç narsa saqlanmaydi.</strong> Birinçidan, maxfiylik muhim.
+  Ikkinçidan, dasturçida şunça matnni saqlab turadigan server olişga pul yöq.</p>
+  <p>Ya'ni naşr qilinmagan maqolangizni yuborsangiz ham, u hiç qayerda qolmaydi.</p>
+</details>
+
+<details>
+  <summary>Fayl yuborsam böladimi?</summary>
+  <p><span class="soon">Hozirça yöq.</span> Bot ayni paytda faqat matn va rasm
+  izohini ögiradi.</p>
+  <p>Rejada bor: <code>.txt</code>, <code>.srt</code> (subtitr), <code>.csv</code>,
+  keyin <code>.docx</code>, <code>.xlsx</code> va <code>.pptx</code> — formatlar
+  (qalin, kursiv, jadval) joyida qolgan holda.</p>
+  <p><code>.pdf</code> bölmaydi: PDF içida tahrirlanadigan matn yöq,
+  faqat sahifadagi şakllar bor. Uni ögirsak, sahifa körinişi buziladi — şuning
+  uçun va'da bermaymiz.</p>
+</details>
+
+<details>
+  <summary>Kirill harflarini ögiradimi?</summary>
+  <p><span class="soon">Hozirça yöq.</span> Rejada bor va u eng katta qöşimça
+  böladi: <code>ў&rarr;ö</code>, <code>ғ&rarr;ğ</code>, <code>ш&rarr;ş</code>,
+  <code>ч&rarr;ç</code>, <code>қ&rarr;q</code>, <code>ҳ&rarr;h</code>,
+  <code>х&rarr;x</code> — tögridan-tögri yangi alifboga.</p>
+  <p>Faqat bir neçta joyda inson közi kerak: <code>ё, ю, я</code> ikki harfga
+  yoyiladi, <code>ц</code> sözga qarab <code>s</code> yoki <code>ts</code>
+  böladi, atoqli otlarning öz yozilişi bor. Şuning uçun u alohida buyruq
+  bölib çiqadi va natijani öqib çiqiş tavsiya etiladi.</p>
+</details>
+
+<details>
+  <summary>Pullikmi?</summary>
+  <p>Yöq, va pullik bölmaydi. Çeklov yöq, röyxatdan ötiş yöq, reklama yöq.</p>
+</details>
+
+<details>
+  <summary>Xato topsam nima qilay?</summary>
+  <p>Bot notögri ögirgan sözni
+  <a href="https://github.com/alkokandiy/ozbekcha_yoz/issues">GitHub</a> da
+  yozib qoldiring. Har bir xato test bölib qöşiladi — ya'ni bir marta
+  tuzatilgandan keyin qaytmaydi.</p>
+  <p>Kod oçiq:
+  <a href="https://github.com/alkokandiy/ozbekcha_yoz">github.com/alkokandiy/ozbekcha_yoz</a>.</p>
+</details>
+
+<footer>
+  Oçiq kodli loyiha ·
+  <a href="https://github.com/alkokandiy/ozbekcha_yoz">GitHub</a> ·
+  <a href="https://t.me/ozbekcha_yoz_bot">Telegram</a>
+</footer>
+
+</div>
+</body>
+</html>

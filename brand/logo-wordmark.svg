@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 180" width="760" height="180" role="img" aria-label="Özbekça Yoz">
+  <title>Özbekça Yoz</title>
+  <circle cx="90" cy="90" r="74" fill="#11857F"/>
+  <circle cx="90" cy="105" r="32" fill="none" stroke="#F7F1E3" stroke-width="11.6"/>
+  <g fill="#D9A441">
+    <rect x="68" y="45" width="14" height="14"/>
+    <rect x="68" y="45" width="14" height="14" transform="rotate(45 75 52)"/>
+    <rect x="98" y="45" width="14" height="14"/>
+    <rect x="98" y="45" width="14" height="14" transform="rotate(45 105 52)"/>
+  </g>
+  <!-- Outline this text before shipping the file anywhere the font is absent. -->
+  <text x="196" y="112" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+        font-size="68" font-weight="500" letter-spacing="1" fill="#11857F">Özbekça Yoz</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Özbekça Yoz">
+  <title>Özbekça Yoz</title>
+  <rect width="512" height="512" rx="96" fill="#11857F"/>
+  <circle cx="256" cy="309" r="104" fill="none" stroke="#F7F1E3" stroke-width="38"/>
+  <g fill="#D9A441">
+    <rect x="183" y="108" width="46" height="46"/>
+    <rect x="183" y="108" width="46" height="46" transform="rotate(45 206 131)"/>
+    <rect x="283" y="108" width="46" height="46"/>
+    <rect x="283" y="108" width="46" height="46" transform="rotate(45 306 131)"/>
+  </g>
+</svg>

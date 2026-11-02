@@ -38,6 +38,9 @@ log = logging.getLogger("yoz.bot")
 #: Telegram's hard limit for one text message.
 MAX_MESSAGE = 4096
 
+#: The FAQ page, served from docs/ by GitHub Pages.
+SITE_URL = "https://alkokandiy.github.io/ozbekcha_yoz/"
+
 START_TEXT = (
     f"{hbold('Özbekcha Yoz')}\n\n"
     "Eski imlodagi matnni yuboring — yangi özbek lotin alifbosiga "
@@ -49,7 +52,8 @@ START_TEXT = (
     "Boşqa hiç narsa özgarmaydi: tinish belgilari, qatorlar, emojilar "
     "joyida qoladi.\n\n"
     "Har qanday çatda ham işlataolasiz: "
-    f"{hcode('@bot_username matn')} deb yozing."
+    f"{hcode('@bot_username matn')} deb yozing.\n\n"
+    f"Savollarga javoblar: {SITE_URL}"
 )
 
 HELP_TEXT = (
