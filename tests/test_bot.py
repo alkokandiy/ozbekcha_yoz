@@ -279,13 +279,26 @@ class TestUzbekSpelling(unittest.TestCase):
     rather than Uzbek. The converter cannot catch these — "hiç" is already in
     the new alphabet, it is simply the wrong word — so they need a list."""
 
+    #: Turkish words that are not Uzbek at all. Extend this list whenever one
+    #: slips through — it is the only defence, since the converter cannot see
+    #: anything wrong with them.
     WRONG = {
-        "hiç": "heç",      # Turkish "hiç"; Uzbek is "hech" -> "heç"
+        "hiç": "heç",
         "için": "uçun",
         "şey": "narsa",
         "değil": "emas",
         "çok": "köp",
         "var": "bor",
+        "yok": "yöq",
+        "ve": "va",
+        "ile": "bilan",
+        "gibi": "kabi",
+        "ama": "ammo",
+        "nasıl": "qanday",
+        "şimdi": "hozir",
+        "güzel": "çiroyli",
+        "kendi": "öz",
+        "evet": "ha",
     }
 
     def _user_facing(self):

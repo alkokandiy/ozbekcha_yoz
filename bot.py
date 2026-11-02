@@ -62,8 +62,7 @@ START_TEXT = (
     f"{hcode('Ch')} → Ç\n\n"
     "Boşqa heç narsa özgarmaydi. Havola, poçta manzili va @nom ham "
     "tegilmaydi — uzun maqola, post va hisobotlar bilan bemalol işlay "
-    "olaman.\n\n"
-    "Matningiz heç qayerda saqlanmaydi."
+    "olaman."
 )
 
 #: The "/" menu, set from here at every startup so it can never drift from
