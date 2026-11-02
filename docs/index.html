@@ -8,78 +8,76 @@
 <meta property="og:title" content="Özbekça Yoz">
 <meta property="og:description" content="Eski imlodagi matnni yangi özbek lotin alifbosiga ögiradigan Telegram bot.">
 <meta property="og:type" content="website">
-<link rel="icon" href="logo-mark-tile.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
   :root {
-    --teal: #11857F;
-    --teal-deep: #0B5F5A;
-    --cream: #F7F1E3;
-    --gold: #D9A441;
-    --bg: #FBFAF6;
-    --card: #FFFFFF;
-    --ink: #1C2321;
-    --ink-soft: #5A6663;
-    --line: #E4E0D4;
+    --ink: #1A1816;
+    --ink-soft: #6B6253;
+    --cream: #F1EBDF;
+    --paper: #FAF6EC;
+    --line: #DED5C2;
+    --accent: #8A6A2F;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #111514;
-      --card: #191E1D;
-      --ink: #ECE8DC;
-      --ink-soft: #9BA6A3;
-      --line: #2A312F;
-      --teal: #2FA79F;
+      --ink: #EDE6D6;
+      --ink-soft: #9A917F;
+      --cream: #141310;
+      --paper: #1C1A16;
+      --line: #2E2A24;
+      --accent: #C9A86A;
     }
+    .lockup { filter: invert(1); }
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: var(--bg);
+    background: var(--cream);
     color: var(--ink);
     font: 400 17px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -webkit-text-size-adjust: 100%;
   }
   .wrap { max-width: 680px; margin: 0 auto; padding: 48px 20px 72px; }
   header { text-align: center; margin-bottom: 40px; }
-  .mark { width: 88px; height: 88px; }
-  h1 { font-size: 30px; font-weight: 600; margin: 18px 0 6px; letter-spacing: -0.2px; }
+  h1 { margin: 0 0 10px; }
+  .lockup { width: min(330px, 78%); height: auto; }
   .tagline { color: var(--ink-soft); margin: 0 0 22px; font-size: 17px; }
   .cta {
-    display: inline-block; background: var(--teal); color: #fff; text-decoration: none;
+    display: inline-block; background: var(--ink); color: var(--cream); text-decoration: none;
     padding: 12px 26px; border-radius: 999px; font-weight: 500; font-size: 16px;
   }
-  .cta:hover { background: var(--teal-deep); }
+  .cta:hover { opacity: 0.86; }
   .demo {
-    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
     padding: 18px 20px; margin: 34px 0 40px; font-size: 15.5px;
   }
   .demo div { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
   .demo .old { color: var(--ink-soft); }
-  .demo .new { color: var(--teal); font-weight: 500; }
-  .demo .arr { color: var(--gold); }
+  .demo .new { color: var(--ink); font-weight: 500; }
+  .demo .arr { color: var(--accent); }
   h2 { font-size: 13px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--ink-soft);
        font-weight: 600; margin: 36px 0 12px; }
   details {
-    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
     padding: 0 20px; margin-bottom: 10px;
   }
-  details[open] { border-color: var(--teal); }
+  details[open] { border-color: var(--ink-soft); }
   summary {
     cursor: pointer; padding: 16px 0; font-weight: 500; list-style: none;
     display: flex; justify-content: space-between; align-items: center; gap: 14px;
   }
   summary::-webkit-details-marker { display: none; }
-  summary::after { content: "+"; color: var(--teal); font-size: 22px; line-height: 1; }
+  summary::after { content: "+"; color: var(--accent); font-size: 22px; line-height: 1; }
   details[open] summary::after { content: "−"; }
   details p { margin: 0 0 16px; color: var(--ink-soft); }
   details p:first-of-type { margin-top: -2px; }
   details strong { color: var(--ink); font-weight: 500; }
   code {
     font: 400 14.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px;
+    background: var(--cream); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px;
   }
-  .soon { color: var(--gold); font-weight: 500; }
-  a { color: var(--teal); }
+  .soon { color: var(--accent); font-weight: 500; }
+  a { color: var(--ink); text-underline-offset: 3px; }
   @media (max-width: 520px) {
     .wrap { padding: 32px 16px 56px; }
     h1 { font-size: 26px; }
@@ -94,17 +92,7 @@
 <div class="wrap">
 
 <header>
-  <svg class="mark" viewBox="0 0 512 512" role="img" aria-label="Özbekça Yoz">
-    <circle cx="256" cy="256" r="256" fill="#11857F"/>
-    <circle cx="256" cy="309" r="110" fill="none" stroke="#F7F1E3" stroke-width="40"/>
-    <g fill="#D9A441">
-      <rect x="181" y="102" width="48" height="48"/>
-      <rect x="181" y="102" width="48" height="48" transform="rotate(45 205 126)"/>
-      <rect x="283" y="102" width="48" height="48"/>
-      <rect x="283" y="102" width="48" height="48" transform="rotate(45 307 126)"/>
-    </g>
-  </svg>
-  <h1>Özbekça Yoz</h1>
+  <h1><img class="lockup" src="logo.png" alt="Özbekça Yoz" width="360" height="240"></h1>
   <p class="tagline">Eski imlodagi matnni yangi özbek lotin alifbosiga ögiradi.</p>
   <a class="cta" href="https://t.me/ozbekcha_yoz_bot">Telegramda oçiş</a>
 </header>

@@ -1,4 +1,4 @@
-"""Özbekcha Yoz — Telegram bot.
+"""Özbekça Yoz — Telegram bot.
 
 Converts old Uzbek Latin orthography (1995) to the official 2023/2026
 alphabet. The conversion itself is a pure function in ``yoz.converter``,
@@ -50,7 +50,7 @@ DONATION_CARD = (os.environ.get("DONATION_CARD") or "").strip()
 DONATION_NAME = (os.environ.get("DONATION_NAME") or "").strip()
 
 START_TEXT = (
-    f"{hbold('Özbekcha Yoz')}\n\n"
+    f"{hbold('Özbekça Yoz')}\n\n"
     "Eski imlodagi matnni yuboring — yangi özbek lotin alifbosiga "
     "ögirib beraman.\n\n"
     f"{hcode(chr(79) + chr(39))} → Ö "

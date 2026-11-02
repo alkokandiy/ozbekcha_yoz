@@ -1,38 +1,64 @@
 # Brand
 
+The logo is a serif wordmark with a quill — ink on cream paper. It reads as
+writing and press rather than software, which is the right association for
+the people this is for.
+
+## Files
+
 | File | Use |
 |---|---|
-| `logo-mark.svg` | Telegram avatar, circular contexts. Full-bleed circle — Telegram crops to a circle anyway, so there is no padding to fight. |
-| `logo-mark-tile.svg` | GitHub, favicon, anywhere square. Same mark, rounded square. |
-| `logo-wordmark.svg` | Horizontal lockup for the README, a web page header, or a channel banner. |
+| `logo-full.png` | The logo as delivered: textured card, soft shadow. Use it where a self-contained image is wanted — README header, GitHub social preview, a slide. |
+| `lockup-ink.png` | Wordmark and quill as ink on a transparent background. For placing on your own surface. Invert it for dark backgrounds (`filter: invert(1)`). |
+| `quill-ink.png` | The quill alone, for use as an accent or a divider. |
+| `avatar.png`, `avatar.svg` | **Telegram avatar and anywhere circular.** The Ö alone, full-bleed. |
+| `avatar-tile.svg` | The same mark as a rounded square, for a favicon or an app icon. |
+| `favicon-32/96/192.png` | Raster favicons for hosts that will not take SVG. |
+| `logo-prompt.md` | The prompt used to generate the mark, kept for regenerating variants. |
 
 ## Colours
 
-| | Hex | Role |
+| | Hex | |
 |---|---|---|
-| Teal | `#11857F` | The mark. Samarkand tile blue-green, dark enough for white text on it. |
-| Cream | `#F7F1E3` | The letter. Not pure white — paper, not screen. |
-| Gold | `#D9A441` | The diacritic only. Never more than the two dots. |
+| Ink | `#1A1816` | Not pure black. Printed ink never is. |
+| Cream | `#F1EBDF` | The paper, sampled from the logo itself. |
+| Paper | `#FAF6EC` | A half-step lighter, for cards sitting on the cream. |
+| Accent | `#8A6A2F` | Warm brown, for the one small thing that must stand out. `#C9A86A` in dark mode. |
 
-All three read in light and dark mode, which is why the mark carries its own
-background rather than inheriting the page's.
+Monochrome on purpose. The logo earns its presence through the letterforms,
+so colour has nothing to add and plenty to spoil.
 
-## The idea
+## Why the avatar is not the logo
 
-The letter is drawn, not typed: the **Ö** is a ring, and its umlaut is two
-eight-pointed stars — the geometry that is on every tiled façade in
-Samarkand and Bukhara, at the one spot in the letter where the new alphabet
-differs from the old. The diacritic *is* the product, so the diacritic is the
-only thing in gold.
+The lockup cannot be the Telegram avatar. Telegram crops to a circle at
+roughly 40px, which cuts the corners off a square, removes the quill, and
+reduces "Özbekça Yoz" to three grey smudges. A logo that is unreadable at
+the size people actually see it is not doing its job.
 
-At 40px the stars stop being stars and read as two dots, which is the correct
-failure: the mark degrades into a legible Ö rather than into mud.
+So the avatar is **the Ö alone**, full-bleed, in the same ink on the same
+cream. It is the one letter the whole project is about, it carries its own
+diacritic, and it survives to 32px.
+
+The quill was the other candidate. It loses: it is drawn in thin outline, and
+below about 48px the lines go pale and the shape turns to fluff. It stays as
+an accent, where its detail can be seen.
+
+## One honest caveat
+
+`avatar.svg` is the Ö rebuilt from two ellipses and two circles — a
+high-contrast serif in the spirit of the wordmark, not a copy of its actual
+typeface. Side by side at large sizes a typographer would see the difference
+in the stroke modulation. At avatar size, nobody will.
+
+If exactness matters later, export the Ö from the original font as outlines
+and drop it in; the geometry in that file is a placeholder worth replacing,
+not a decision to defend.
 
 ## Rules
 
-- The gold is for diacritics. Never fill the ring with it, never use it for text.
-- Do not add a stroke or a shadow to the mark. It is flat on purpose.
-- Do not stretch the lockup. If it needs to be narrower, stack the wordmark
-  under the mark instead.
-- The wordmark's text is live text. Convert it to outlines before using the
-  file anywhere the font will not be available — a web page may keep it live.
+- Do not recolour the mark. Ink on cream, or inverted. Nothing else.
+- Do not put the lockup on a photograph or a busy background. It is a
+  printed mark and wants a plain surface.
+- Do not stretch the lockup, and do not re-set the wordmark in another font
+  to make it fit — use `avatar.svg` when the space is tight.
+- Keep the accent brown for one element at a time.

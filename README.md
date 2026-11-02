@@ -1,4 +1,8 @@
-# Özbekcha Yoz
+<p align="center">
+  <img src="brand/logo-full.png" alt="Özbekça Yoz" width="260">
+</p>
+
+# Özbekça Yoz
 
 Telegram bot that rewrites text from the old Uzbek Latin orthography (1995)
 into the official updated alphabet (2023/2026 standard).

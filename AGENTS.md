@@ -1,4 +1,4 @@
-# Özbekcha Yoz — notes for agents
+# Özbekça Yoz — notes for agents
 
 A Telegram bot that converts old Uzbek Latin orthography (1995) to the
 2023/2026 standard. Small on purpose.

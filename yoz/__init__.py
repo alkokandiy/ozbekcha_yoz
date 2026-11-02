@@ -1,4 +1,4 @@
-"""Özbekcha Yoz — old (1995) Uzbek Latin orthography to the 2023/2026 standard."""
+"""Özbekça Yoz — old (1995) Uzbek Latin orthography to the 2023/2026 standard."""
 
 from .converter import convert
 

@@ -1,6 +1,6 @@
 # Roadmap
 
-Where Özbekcha Yoz could go next, in the order that gets the most use out of
+Where Özbekça Yoz could go next, in the order that gets the most use out of
 the least new risk. Nothing here is committed to; it is a map, not a promise.
 
 The thing to protect at every step: **the bot changes four character patterns
