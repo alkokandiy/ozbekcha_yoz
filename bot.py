@@ -60,9 +60,10 @@ START_TEXT = (
     f"{hcode(chr(71) + chr(39))} → Ğ "
     f"{hcode('Sh')} → Ş "
     f"{hcode('Ch')} → Ç\n\n"
-    "Boşqa hiç narsa özgarmaydi. Havola, poçta manzili va @nom ham "
-    "tegilmaydi — uzun maqola, post yoki hisobotni bemalol taşlayvering.\n\n"
-    "Matningiz hiç qayerda saqlanmaydi."
+    "Boşqa heç narsa özgarmaydi. Havola, poçta manzili va @nom ham "
+    "tegilmaydi — uzun maqola, post va hisobotlar bilan bemalol işlay "
+    "olaman.\n\n"
+    "Matningiz heç qayerda saqlanmaydi."
 )
 
 #: The "/" menu, set from here at every startup so it can never drift from
@@ -92,7 +93,7 @@ HELP_TEXT = (
     "özgarsa, havola öladi. #xeştag esa ögiriladi — u manzil emas, siz "
     "yozgan söz.\n\n"
     f"{hbold('Maxfiylik')}\n"
-    "Hiç narsa saqlanmaydi. Birinçidan, maxfiylik muhim. Ikkinçidan, "
+    "Heç narsa saqlanmaydi. Birinçidan, maxfiylik muhim. Ikkinçidan, "
     "dasturçida şunça matnni saqlab turadigan server olişga pul yöq."
 )
 
@@ -119,7 +120,7 @@ def donation_text() -> str:
     if len(digits) != 16:
         return (
             "Hozirça homiylik uçun karta qöyilmagan. "
-            "Bot baribir bepul — hiç narsa özgarmaydi."
+            "Bot baribir bepul — heç narsa özgarmaydi."
         )
     grouped = " ".join(digits[i : i + 4] for i in range(0, 16, 4))
     lines = [

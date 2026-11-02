@@ -271,3 +271,46 @@ class TestCommandMenu(unittest.TestCase):
         listed = {c.command for c in bot_module.COMMANDS}
         self.assertTrue({"help", "donat"}.isdisjoint(listed))
         self.assertTrue({"help", "donat"} <= self._handled())
+
+
+@unittest.skipIf(bot_module is None, "aiogram not installed")
+class TestUzbekSpelling(unittest.TestCase):
+    """Guards against words that are Turkish, or another language's spelling,
+    rather than Uzbek. The converter cannot catch these — "hiç" is already in
+    the new alphabet, it is simply the wrong word — so they need a list."""
+
+    WRONG = {
+        "hiç": "heç",      # Turkish "hiç"; Uzbek is "hech" -> "heç"
+        "için": "uçun",
+        "şey": "narsa",
+        "değil": "emas",
+        "çok": "köp",
+        "var": "bor",
+    }
+
+    def _user_facing(self):
+        import pathlib
+        import re
+
+        texts = {
+            "START_TEXT": bot_module.START_TEXT,
+            "HELP_TEXT": bot_module.HELP_TEXT,
+            "donation": bot_module.donation_text(),
+        }
+        for command in bot_module.COMMANDS:
+            texts[f"/{command.command}"] = command.description
+        for row in bot_module.start_keyboard().inline_keyboard:
+            for button in row:
+                texts[f"button {button.text!r}"] = button.text
+        page = pathlib.Path(__file__).resolve().parent.parent / "docs" / "index.html"
+        body = re.sub(r"<(script|style).*?</\1>", "", page.read_text(), flags=re.S)
+        texts["FAQ page"] = re.sub(r"<[^>]+>", " ", body)
+        return texts
+
+    def test_no_foreign_spellings(self):
+        import re
+
+        for where, text in self._user_facing().items():
+            words = {w.lower() for w in re.findall(r"[\wÖĞŞÇöğşç']+", text)}
+            for wrong, right in self.WRONG.items():
+                self.assertNotIn(wrong, words, f"{where}: write {right!r}, not {wrong!r}")

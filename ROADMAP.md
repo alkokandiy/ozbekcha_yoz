@@ -250,7 +250,7 @@ server if the free tier ends.
 
 Keep the `/help` wording as it is, including the second half:
 
-> Hiç narsa saqlanmaydi. Birinçidan, maxfiylik muhim. Ikkinçidan,
+> Heç narsa saqlanmaydi. Birinçidan, maxfiylik muhim. Ikkinçidan,
 > dasturçida şunça matnni saqlab turadigan server olişga pul yöq.
 
 It is funnier than a privacy policy and more credible than one, because the
