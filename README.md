@@ -14,6 +14,13 @@ Nothing else changes. Other letters, words, grammar, punctuation, line
 breaks, spacing, emojis and code blocks come back exactly as they were sent,
 and the reply contains only the converted text — no greeting, no preface.
 
+**Addresses are left alone.** URLs, email addresses and `@mentions` pass
+through untouched, because `sch` and `ch` are common in links and a changed
+character there is a dead link rather than a spelling choice. `#hashtags` do
+convert — a hashtag is a word the author wrote, and Telegram accepts
+`#çoyxona` happily, while an `@mention` converted the same way points at
+nobody.
+
 ## Why there is no AI in it
 
 The conversion is a closed set of four character patterns, so the bot does it

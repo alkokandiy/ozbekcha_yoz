@@ -64,7 +64,14 @@ HELP_TEXT = (
     "Ch · CH → Ç ch → ç\n\n"
     f"{hbold('Diqqat')}\n"
     "O yoki G dan keyin kelmagan tutuq belgisi özgarmaydi — "
-    f"{hcode('san' + chr(39) + 'at')} şundayligida qoladi."
+    f"{hcode('san' + chr(39) + 'at')} şundayligida qoladi.\n\n"
+    f"{hbold('Manzillar özgarmaydi')}\n"
+    "Havola, pochta manzili va @nom öz holiça qoladi: ularda bitta harf "
+    "özgarsa, havola öladi. #xeştag esa ögiriladi — u manzil emas, siz "
+    "yozgan söz.\n\n"
+    f"{hbold('Maxfiylik')}\n"
+    "Hiç narsa saqlanmaydi. Birinçidan, maxfiylik muhim. Ikkinçidan, "
+    "dasturçida şunça matnni saqlab turadigan server olişga pul yöq."
 )
 
 dp = Dispatcher()

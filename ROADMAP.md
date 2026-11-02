@@ -11,43 +11,34 @@ being usable for real work.
 
 ---
 
-## Phase 0 — A defect, found while checking this roadmap's claims
+## Phase 0 — Addresses are protected (done)
 
-Links are corrupted:
+Links were being corrupted: `example.com/schools/chat` came back as
+`example.com/sçools/çat`. `sch` and `ch` are everywhere in URLs, and the
+damage was silent — the prose read correctly and only the link was dead.
 
-```
-https://example.com/schools/chat?id=5
-  ->  https://example.com/sçools/çat?id=5
-```
+The rule now is **words versus addresses**:
 
-`sch` and `ch` occur constantly in URLs, and a converted URL is a dead URL.
-This is not theoretical for the stated audience: journalists, channel owners
-and bloggers paste posts that contain links, and the damage is silent — the
-text reads correctly and only the link is broken.
+| | behaviour | why |
+|---|---|---|
+| URLs, `www.` and bare hosts (`t.me/kanal`) | untouched | a changed path is a 404 |
+| email addresses | untouched, local part included | a changed address bounces |
+| `@mentions` | untouched | Telegram handles cannot contain ö/ğ/ş/ç at all |
+| `#hashtags` | **converted** | a hashtag is a word the author wrote |
 
-The same applies to anything that is a machine identifier rather than prose:
+The hashtag split is deliberate. Telegram accepts `#çoyxona` perfectly well,
+and a channel moving to the new alphabet wants its tags moved with it; an
+@mention converted the same way just points at nobody.
 
-| | why it must not convert |
-|---|---|
-| URLs (`http://`, `https://`, `www.`, bare domains) | a changed path is a 404 |
-| email addresses | a changed address does not deliver |
-| `@mentions` | Telegram usernames cannot contain ö/ğ/ş/ç at all |
-| `#hashtags` | a converted tag is a *different* tag, splitting an audience |
+Implemented inside the single pass rather than as a pre-filter: the
+alternation matches an address *before* anything inside it can match, and
+returns it verbatim. So the one-pass guarantee still holds, and
+`ischi https://a.uz/ischi ischi` converts the prose on both sides while
+leaving the middle alone.
 
-Hashtags are the arguable one — a channel moving to the new alphabet may well
-want its tags converted too — so that should be a setting, with "leave them
-alone" as the default. URLs, emails and mentions are not arguable.
-
-The fix is to tokenise before substituting: split the text on URL / email /
-mention patterns, convert only the prose between them, and reassemble. This
-keeps the single-pass guarantee and is maybe 20 lines plus tests, but it is
-the first change that makes the converter more than one regex, so it needs
-the corpus from 1.3 to protect it.
-
-Until it ships, `/help` should say that links are converted too, so nobody
-loses a URL without warning.
-
----
+A bare host is only recognised when it ends in a known TLD, which is what
+stops a missing space after a full stop (`keldim.Shunda`) from being read as
+a domain. `TLDS` in `converter.py` is the list to extend.
 
 ## Phase 1 — Cheap wins, no new failure modes
 
@@ -99,27 +90,35 @@ correctness trap in it.
 
 ### 2.1 The run-splitting problem — read this before writing any code
 
+**This is not about Uzbek spelling.** There is no claim here that `sh` or `ch`
+sometimes aren't digraphs — the only case where they aren't is a separator
+apostrophe (`is'hoq`), and that already works. The problem is how `.docx`
+stores text, and it would hit an English or Turkish converter identically.
+
 A `.docx` paragraph is not a string. It is a list of *runs*, and Word splits
 runs wherever formatting changes — and also, unhelpfully, wherever it feels
-like it after spell-check, tracked changes, or editing history. The word
-`Shahar` can legitimately be stored as:
+like it after spell-check, tracked changes, or an editing session. The word
+`Shahar`, in one unbroken sentence with no formatting anywhere, can be stored
+as:
 
+```xml
+<w:r><w:t>S</w:t></w:r><w:r><w:t>hahar</w:t></w:r>
 ```
-run1: "S"   run2: "hahar"
-```
 
-Converting run by run then sees `S` with no `h` after it, and the digraph
-never matches. The document comes back half-converted, which is worse than
-not converted, because nobody can see which half.
+Nothing in the document looks split. Only the XML is. Converting run by run
+then sees `S` with no `h` after it, so the digraph never matches, and the
+document comes back half-converted — worse than untouched, because nobody can
+see which half.
 
-The fix: work at paragraph level. Concatenate the runs, convert the whole
-string, then write the result back across the runs — redistributing by
-character offset so each run keeps its own bold, italic, size and colour.
-Lengths shift (`o'` is two characters, `ö` is one), so the mapping back is
-offset arithmetic, not a zip.
+The fix is exactly the "good algorithm" to use: don't convert runs. For each
+paragraph, concatenate the runs into one string, convert that string, then
+write the result back across the runs by character offset, so every run keeps
+its own bold, italic, size and colour. Lengths shift (`o'` is two characters,
+`ö` is one), so writing back is offset arithmetic rather than a zip.
 
-This is the one piece of this roadmap I would not delegate, and the one that
-needs a test fixture with deliberately split runs.
+Needs a test fixture containing a deliberately run-split word. Build it by
+saving a file out of real Word with tracked changes, not by hand — hand-built
+XML will be too tidy to catch the bug.
 
 ### 2.2 `.docx` — python-docx
 
@@ -146,27 +145,23 @@ users expect to be converted.
 Same run problem as `.docx`, same solution. Slide text, speaker notes, tables,
 chart labels, SmartArt.
 
-### 2.5 `.pdf` — be honest about this one
+### 2.5 `.pdf` — out of scope, by decision
 
-PDF has no text model to edit; it has glyphs at coordinates. Converting a PDF
-faithfully means re-typesetting it, and the result will not match the original
-layout. Promising "send a PDF, get a PDF" leads to complaints.
+PDF has no text model to edit, only glyphs at coordinates, so converting one
+faithfully means re-typesetting it. Not attempted.
 
-What to offer instead: extract the text and return `.txt` or `.docx`, stating
-plainly that layout is lost. That is still useful — people want the words back
-so they can re-lay them out themselves.
+If it is ever asked for, the only honest version is: extract the text, return
+`.txt` or `.docx`, and say plainly that the layout is gone.
 
-### 2.6 Scripts and code — convert strings and comments only
+### 2.6 Scripts and code — dropped
 
-"Fix my script the same way" is a reasonable request with an unreasonable
-literal reading. Blanket-converting a `.py` or `.js` file rewrites identifiers
-and keywords: `search` becomes `searç`, `choice` becomes `çoice`, and the file
-no longer runs. Worse, it looks fine in a diff to anyone not reading closely.
+Converting a source file wholesale rewrites identifiers: `search` becomes
+`searç`, `choice` becomes `çoice`, and the file stops running while still
+looking plausible in a diff. Doing it properly needs a per-language tokeniser
+that converts string literals and comments only — a lot of machinery for a
+handful of users.
 
-The useful behaviour is to convert **string literals and comments only**,
-leaving code untouched — a tokeniser-level job, per language, not a regex one.
-Until that exists, a code file should get a warning and a plain-text
-conversion the user has to opt into, not a silent rewrite.
+Dropped. If someone genuinely needs it, they can convert the strings by hand.
 
 ### 2.7 Limits and privacy, stated in `/help`
 
@@ -179,27 +174,42 @@ handler rather than retrofitted.
 
 ---
 
-## Phase 3 — Cyrillic to Latin
+## Phase 3 — Cyrillic to new Latin
 
-A different class of problem, and the largest expansion available.
+Promoted. My first draft of this section over-weighted the ambiguity, on the
+strength of general transliteration problems rather than how Uzbek Cyrillic is
+actually written: **ъ and ь are not used in practice, and е/ye is not the
+obstacle I made it out to be.** That removes most of what made this look
+expensive.
 
-Everything so far is a character substitution with no ambiguity. Cyrillic
-transliteration is not: **е** is `e` or `ye` depending on position, **ё/ю/я**
-expand to two letters, **ъ** and **ь** have no clean equivalent, **щ** maps to
-a sequence, and proper nouns have conventional spellings that rules get wrong.
-Any rule set will be about 95% right, and the remaining 5% lands in people's
-names.
+What it needs is a direct table into the *new* alphabet, not a detour through
+the old one:
 
-So it needs the Phase 1.3 corpus first, built much larger, and reviewed by
-someone who writes Uzbek professionally. It should also be a clearly separate
-command (`/kirill`) so nobody gets it by accident, and the output should be
-presented as a draft to proofread, not a finished conversion.
+```
+ў → ö    ғ → ğ    ш → ş    ч → ç    қ → q
+ҳ → h    х → x    ж → j    й → y    ц → s
+```
 
-The audience is real — older writers, archives, and the enormous body of
-Cyrillic text that has to move eventually — but shipping it badly would
-undermine trust in the part that is exact.
+Note that `ў → ö` and `ш → ş` land on the new letters in one step. Converting
+Cyrillic to the old Latin first, then running it through this bot, would be
+two lossy steps where one exact one will do.
 
----
+The parts that still need a decision from someone who writes Uzbek
+professionally, rather than a rule I invent:
+
+- **ё, ю, я** expand to two letters (`yo`, `yu`, `ya`), so they change the
+  length of the word — fine, but it means this cannot share the simple
+  one-character substitution machinery.
+- **ц** is `s` in `сирк`-type words and `ts` in some borrowings. Pick one
+  default, list the exceptions.
+- **щ** is rare but real: `şç`.
+- **Proper nouns** have conventional spellings that any rule set will
+  occasionally override. This is the only place the output needs reviewing.
+
+So: a direct table, a separate `/kirill` command so nobody gets it by
+accident, and a corpus of real paragraphs checked by eye before it ships.
+Still the largest audience available — older writers, archives, and the body
+of Cyrillic text that has to move eventually.
 
 ## Phase 4 — Reach
 
@@ -207,7 +217,7 @@ undermine trust in the part that is exact.
   to; a bot that converts every message is a bot that gets removed. For
   channels, an admin-bot mode that converts posts as they are published is the
   feature channel owners will ask for by name.
-- **A web page.** The converter is 40 lines of regex and ports to JavaScript
+- **A web page.** The converter is 60 lines of regex and ports to JavaScript
   in an afternoon: a paste box at a URL, no install, no Telegram account,
   works from a desktop newsroom. It also gives the project something to be
   found by in search, which a bot cannot be.
@@ -217,11 +227,42 @@ undermine trust in the part that is exact.
 - **A Dockerfile.** Railway is fine, but one file makes the bot portable to
   any host, which matters if free tiers change.
 
-Deliberately **not** on this list: an account system, message history, a
-database, analytics on message content, or paid tiers. The bot's value is that
-it is instant, free and keeps nothing. Each of those would cost that.
+### 4.1 Donations
 
----
+A `/homiylik` (or `/donat`) command, as the only thing the bot ever asks for.
+Two options, and they are not equivalent:
+
+- **A payment page** (tirikchilik.uz or similar) — a link, no personal data in
+  the bot, and the page handles its own receipts.
+- **A card number**, 16 digits, printed on request. Simplest thing that works,
+  and normal practice in Uzbekistan.
+
+If it is a card number: put it in an environment variable
+(`DONATION_CARD`), never in the source, so the repo stays public and the
+number can change without a commit — and use a card that is fine to publish,
+since anything a bot prints is effectively public. A card number alone can
+only *receive*. Nothing else belongs anywhere near this bot: no expiry date,
+no CVV, no SMS codes, and no form that collects them. The bot's answer to
+`/homiylik` should be the number and nothing more.
+
+Everything else stays free with no limits. The point of donations is to cover
+a server if the free tier ever ends, not to gate anything.
+
+### 4.2 The privacy line
+
+Keep the `/help` wording as it is, including the second half:
+
+> Hiç narsa saqlanmaydi. Birinçidan, maxfiylik muhim. Ikkinçidan,
+> dasturçida şunça matnni saqlab turadigan server olişga pul yöq.
+
+It is funnier than a privacy policy and more credible than one, because the
+second reason is checkable. The commitment is real either way: files are
+processed in memory and never written to disk, which is only true if it is
+designed in from the first file handler rather than retrofitted.
+
+Deliberately **not** on the list: accounts, message history, a database,
+analytics on message content, or paid tiers. The bot's value is that it is
+instant, free and keeps nothing.
 
 ## Open questions
 
@@ -240,6 +281,7 @@ plain-text handlers (1.2), CI (1.3), the `.xlsx` and `.pptx` walkers once the
 run-redistribution helper exists (2.3, 2.4), interface translations, the
 Dockerfile.
 
-Keep: the run-offset redistribution in 2.1, the code-literal tokeniser in 2.6,
-every line of the Cyrillic rules in Phase 3, and all review. These are the
-places where a plausible-looking wrong answer survives a passing test.
+Keep: the run-offset redistribution in 2.1, the Cyrillic table and its
+exception list in Phase 3, anything touching the donation command, and all
+review. These are the places where a plausible-looking wrong answer survives
+a passing test.

@@ -123,3 +123,77 @@ class TestEnvExample(unittest.TestCase):
                 break
         else:
             self.fail("BOT_TOKEN line missing from .env.example")
+
+
+class TestAddressesAreProtected(unittest.TestCase):
+    """Words convert; addresses do not. A changed character in a URL, an
+    email or a handle means a dead link, not a spelling choice."""
+
+    def test_url_path_survives(self):
+        # The bug this guards: /schools/chat -> /sçools/çat
+        url = "https://example.com/schools/chat?id=5&q=cha"
+        self.assertEqual(convert(url), url)
+
+    def test_prose_around_a_url_still_converts(self):
+        self.assertEqual(
+            convert("Shahar https://example.com/chat chiroyli"),
+            "Şahar https://example.com/chat çiroyli",
+        )
+
+    def test_markdown_link_converts_label_only(self):
+        self.assertEqual(
+            convert("[Shahar](https://example.com/chat)"),
+            "[Şahar](https://example.com/chat)",
+        )
+
+    def test_scheme_less_hosts(self):
+        for address in (
+            "www.school.uz/chat",
+            "t.me/ozbekcha_yoz_bot",
+            "example.com",
+            "chat.openai.com/share/chiroyli",
+            "kun.uz/news/choy",
+        ):
+            self.assertEqual(convert(address), address, address)
+
+    def test_email_is_untouched_including_local_part(self):
+        for address in ("ishchi@school.uz", "bosh.muharrir@kun.uz"):
+            self.assertEqual(convert(address), address, address)
+
+    def test_mention_is_untouched(self):
+        self.assertEqual(convert("@choyxona ga yozing"), "@choyxona ga yozing")
+
+    def test_email_wins_over_mention(self):
+        # "@school.uz" must not be read as a mention of "@school".
+        self.assertEqual(convert("ishchi@school.uz"), "ishchi@school.uz")
+
+    def test_hashtag_converts(self):
+        # A hashtag is a word the author wrote, not an address.
+        self.assertEqual(convert("#choyxona #Toshkent"), "#çoyxona #Toşkent")
+
+    def test_missing_space_is_not_a_domain(self):
+        # A TLD whitelist keeps sentence punctuation out of the address rule.
+        self.assertEqual(convert("Men keldim.Shunda u ketdi"), "Men keldim.Şunda u ketdi")
+        self.assertEqual(convert("ochildi.Shu kuni"), "oçildi.Şu kuni")
+
+    def test_telegram_style_post(self):
+        src = (
+            "Toshkentda yangi choyxona ochildi!\n"
+            "Batafsil: https://kun.uz/news/2026/choyxona-ochildi\n"
+            "Savollar: @choyxona_admin yoki ishchi@choyxona.uz\n"
+            "#choyxona #Toshkent"
+        )
+        self.assertEqual(
+            convert(src),
+            "Toşkentda yangi çoyxona oçildi!\n"
+            "Batafsil: https://kun.uz/news/2026/choyxona-ochildi\n"
+            "Savollar: @choyxona_admin yoki ishchi@choyxona.uz\n"
+            "#çoyxona #Toşkent",
+        )
+
+    def test_address_protection_is_still_one_pass(self):
+        # Converted output must never be re-scanned, even next to an address.
+        self.assertEqual(
+            convert("ischi https://a.uz/ischi ischi"),
+            "isçi https://a.uz/ischi isçi",
+        )
