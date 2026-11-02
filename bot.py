@@ -1,0 +1,171 @@
+"""Özbekcha Yoz — Telegram bot.
+
+Converts old Uzbek Latin orthography (1995) to the official 2023/2026
+alphabet. The conversion itself is a pure function in ``yoz.converter``,
+so the bot needs no AI model, no API key and no network beyond Telegram.
+
+Run locally:   BOT_TOKEN=123:abc python bot.py
+On Railway:    the Procfile worker starts this file.
+"""
+
+import asyncio
+import logging
+import os
+import sys
+
+from aiogram import Bot, Dispatcher, F
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from aiogram.filters import Command, CommandStart
+from aiogram.types import (
+    InlineQuery,
+    InlineQueryResultArticle,
+    InlineQueryResultsButton,
+    InputTextMessageContent,
+    Message,
+)
+from aiogram.utils.markdown import hbold, hcode
+
+from yoz import convert
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+log = logging.getLogger("yoz.bot")
+
+#: Telegram's hard limit for one text message.
+MAX_MESSAGE = 4096
+
+START_TEXT = (
+    f"{hbold('Özbekcha Yoz')}\n\n"
+    "Eski imlodagi matnni yuboring — yangi özbek lotin alifbosiga "
+    "ögirib beraman.\n\n"
+    f"{hcode(chr(79) + chr(39))} → Ö "
+    f"{hcode(chr(71) + chr(39))} → Ğ "
+    f"{hcode('Sh')} → Ş "
+    f"{hcode('Ch')} → Ç\n\n"
+    "Boşqa hiç narsa özgarmaydi: tinish belgilari, qatorlar, emojilar "
+    "joyida qoladi.\n\n"
+    "Har qanday çatda ham işlataolasiz: "
+    f"{hcode('@bot_username matn')} deb yozing."
+)
+
+HELP_TEXT = (
+    f"{hbold('Qanday işlaydi')}\n\n"
+    "Matn yuboring — javob sifatida faqat ögirilgan matnni olasiz.\n\n"
+    f"{hbold('Ögirish jadvali')}\n"
+    "O' · O’ · O` · Oʻ → Ö\n"
+    "o' · o’ · o` · oʻ → ö\n"
+    "G' · G’ · G` · Gʻ → Ğ\n"
+    "g' · g’ · g` · gʻ → ğ\n"
+    "Sh · SH → Ş sh → ş\n"
+    "Ch · CH → Ç ch → ç\n\n"
+    f"{hbold('Diqqat')}\n"
+    "O yoki G dan keyin kelmagan tutuq belgisi özgarmaydi — "
+    f"{hcode('san' + chr(39) + 'at')} şundayligida qoladi."
+)
+
+dp = Dispatcher()
+
+
+@dp.message(CommandStart())
+async def on_start(message: Message) -> None:
+    me = await message.bot.me()
+    await message.answer(START_TEXT.replace("bot_username", me.username or "bot"))
+
+
+@dp.message(Command("help", "yordam"))
+async def on_help(message: Message) -> None:
+    await message.answer(HELP_TEXT)
+
+
+@dp.message(F.text)
+async def on_text(message: Message) -> None:
+    await _reply_converted(message, message.text)
+
+
+@dp.message(F.caption)
+async def on_caption(message: Message) -> None:
+    await _reply_converted(message, message.caption)
+
+
+async def _reply_converted(message: Message, source: str) -> None:
+    """Send the converted text and nothing else."""
+    result = convert(source)
+    # Conversion never lengthens text (two characters become one), so a
+    # chunker is only a guard against forwarded oddities.
+    for chunk in _chunks(result):
+        await message.answer(chunk, parse_mode=None)
+
+
+def _chunks(text: str, size: int = MAX_MESSAGE):
+    if len(text) <= size:
+        yield text
+        return
+    for start in range(0, len(text), size):
+        yield text[start : start + size]
+
+
+@dp.inline_query()
+async def on_inline(query: InlineQuery) -> None:
+    """Let the bot be used inside any chat: ``@bot matn``."""
+    source = query.query
+    if not source:
+        await query.answer(
+            [],
+            cache_time=5,
+            is_personal=True,
+            button=InlineQueryResultsButton(
+                text="Ögirmoqçi bölgan matnni yozing",
+                start_parameter="start",
+            ),
+        )
+        return
+
+    result = convert(source)
+    await query.answer(
+        [
+            InlineQueryResultArticle(
+                id="yoz",
+                title="Yangi alifboda yuborish",
+                description=result[:120],
+                input_message_content=InputTextMessageContent(
+                    message_text=result[:MAX_MESSAGE],
+                    parse_mode=None,
+                ),
+            )
+        ],
+        cache_time=0,
+        is_personal=True,
+    )
+
+
+def read_token() -> str:
+    for name in ("BOT_TOKEN", "TELEGRAM_BOT_TOKEN", "TELEGRAM_TOKEN"):
+        token = (os.environ.get(name) or "").strip()
+        if token:
+            return token
+    sys.exit(
+        "BOT_TOKEN is not set. Add it as a Railway variable "
+        "(or export it locally) and restart."
+    )
+
+
+async def main() -> None:
+    bot = Bot(
+        token=read_token(),
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    )
+    # A leftover webhook would stop long polling from ever receiving updates.
+    await bot.delete_webhook(drop_pending_updates=True)
+    me = await bot.me()
+    log.info("starting as @%s", me.username)
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        log.info("stopped")
