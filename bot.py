@@ -19,6 +19,8 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
 from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
     InlineQuery,
     InlineQueryResultArticle,
     InlineQueryResultsButton,
@@ -57,17 +59,15 @@ START_TEXT = (
     f"{hcode(chr(71) + chr(39))} → Ğ "
     f"{hcode('Sh')} → Ş "
     f"{hcode('Ch')} → Ç\n\n"
-    "Boşqa hiç narsa özgarmaydi: tinish belgilari, qatorlar, emojilar "
+    "Boşqa hiç narsa özgarmaydi: tiniş belgilari, qatorlar, emojilar "
     "joyida qoladi.\n\n"
-    "Har qanday çatda ham işlataolasiz: "
-    f"{hcode('@bot_username matn')} deb yozing.\n\n"
-    f"Savollarga javoblar: {SITE_URL}"
+    "Har qanday çatda ham işlataolasiz — pastdagi tugmani bosing."
 )
 
 HELP_TEXT = (
     f"{hbold('Qanday işlaydi')}\n\n"
     "Matn yuboring — javob sifatida faqat ögirilgan matnni olasiz.\n\n"
-    f"{hbold('Ögirish jadvali')}\n"
+    f"{hbold('Ögiriş jadvali')}\n"
     "O' · O’ · O` · Oʻ → Ö\n"
     "o' · o’ · o` · oʻ → ö\n"
     "G' · G’ · G` · Gʻ → Ğ\n"
@@ -78,13 +78,30 @@ HELP_TEXT = (
     "O yoki G dan keyin kelmagan tutuq belgisi özgarmaydi — "
     f"{hcode('san' + chr(39) + 'at')} şundayligida qoladi.\n\n"
     f"{hbold('Manzillar özgarmaydi')}\n"
-    "Havola, pochta manzili va @nom öz holiça qoladi: ularda bitta harf "
+    "Havola, poçta manzili va @nom öz holiça qoladi: ularda bitta harf "
     "özgarsa, havola öladi. #xeştag esa ögiriladi — u manzil emas, siz "
     "yozgan söz.\n\n"
     f"{hbold('Maxfiylik')}\n"
     "Hiç narsa saqlanmaydi. Birinçidan, maxfiylik muhim. Ikkinçidan, "
     "dasturçida şunça matnni saqlab turadigan server olişga pul yöq."
 )
+
+def start_keyboard() -> InlineKeyboardMarkup:
+    """Buttons under /start.
+
+    A raw link in the message body gets ignored; a button with a plain Uzbek
+    label gets pressed, and it hides the URL entirely — so where the page is
+    hosted stops mattering.
+    """
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Savollarga javoblar", url=SITE_URL)],
+            # Opens Telegram's chat picker with this bot's inline query ready,
+            # which is the only way most people ever discover inline mode.
+            [InlineKeyboardButton(text="Boşqa çatda işlatiş", switch_inline_query="")],
+        ]
+    )
+
 
 def donation_text() -> str:
     """The reply to /homiylik, or an apology when nothing is configured."""
@@ -112,7 +129,10 @@ dp = Dispatcher()
 @dp.message(CommandStart())
 async def on_start(message: Message) -> None:
     me = await message.bot.me()
-    await message.answer(START_TEXT.replace("bot_username", me.username or "bot"))
+    await message.answer(
+        START_TEXT.replace("bot_username", me.username or "bot"),
+        reply_markup=start_keyboard(),
+    )
 
 
 @dp.message(Command("help", "yordam"))
@@ -173,7 +193,7 @@ async def on_inline(query: InlineQuery) -> None:
         [
             InlineQueryResultArticle(
                 id="yoz",
-                title="Yangi alifboda yuborish",
+                title="Yangi alifboda yuboriş",
                 description=result[:120],
                 input_message_content=InputTextMessageContent(
                     message_text=result[:MAX_MESSAGE],

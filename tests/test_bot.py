@@ -197,3 +197,39 @@ class TestDonation(unittest.TestCase):
         for path in (root / "bot.py", root / "docs" / "index.html"):
             found = re.findall(r"\b\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4}\b", path.read_text())
             self.assertEqual(found, [], f"{path.name} contains something card-shaped")
+
+
+@unittest.skipIf(bot_module is None, "aiogram not installed")
+class TestBotSpeaksTheNewAlphabet(unittest.TestCase):
+    """The bot's own prose must be a fixed point of its own converter.
+
+    A tool for the new alphabet writing "tinish" or "yuborish" in its own
+    replies is the one typo it cannot afford, and it slipped through twice.
+    """
+
+    def _prose_lines(self, text):
+        import re
+
+        for line in text.splitlines():
+            # The mapping tables deliberately show the old forms on the left.
+            if "→" in line:
+                continue
+            stripped = re.sub(r"<[^>]+>", " ", line)
+            if stripped.strip():
+                yield stripped
+
+    def test_every_reply_is_already_converted(self):
+        from yoz import convert
+
+        texts = {
+            "START_TEXT": bot_module.START_TEXT,
+            "HELP_TEXT": bot_module.HELP_TEXT,
+            "donation (unset)": bot_module.donation_text(),
+        }
+        for row in bot_module.start_keyboard().inline_keyboard:
+            for i, button in enumerate(row):
+                texts[f"button {button.text!r}"] = button.text
+
+        for where, text in texts.items():
+            for line in self._prose_lines(text):
+                self.assertEqual(convert(line), line, f"old orthography in {where}: {line!r}")
