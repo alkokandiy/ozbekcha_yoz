@@ -42,6 +42,14 @@ word nobody asked it to touch.
 | `@your_bot matn` in any chat | inline mode, converts without leaving the chat |
 | `/start`, `/help` | short instructions in Uzbek |
 
+## Commands
+
+`/start`, `/yordam` and `/homiylik` are registered with Telegram from
+`COMMANDS` in `bot.py` on every startup, so the `/` menu can never drift
+from the handlers. `/help` and `/donat` still work as aliases; they are kept
+out of the menu so it does not list the same thing twice. A test asserts
+every listed command has a handler.
+
 ## Deploying to Railway
 
 1. Talk to [@BotFather](https://t.me/BotFather) → `/newbot` → copy the token.

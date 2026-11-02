@@ -227,9 +227,47 @@ class TestBotSpeaksTheNewAlphabet(unittest.TestCase):
             "donation (unset)": bot_module.donation_text(),
         }
         for row in bot_module.start_keyboard().inline_keyboard:
-            for i, button in enumerate(row):
+            for button in row:
                 texts[f"button {button.text!r}"] = button.text
+        for command in bot_module.COMMANDS:
+            texts[f"/{command.command}"] = command.description
 
         for where, text in texts.items():
             for line in self._prose_lines(text):
                 self.assertEqual(convert(line), line, f"old orthography in {where}: {line!r}")
+
+
+@unittest.skipIf(bot_module is None, "aiogram not installed")
+class TestCommandMenu(unittest.TestCase):
+    """The "/" menu is set from COMMANDS at startup, so it cannot drift from
+    the handlers — as long as every entry in it is actually handled."""
+
+    def _handled(self):
+        from aiogram.filters import Command
+
+        names = set()
+        for handler in bot_module.dp.message.handlers:
+            for f in handler.filters or []:
+                obj = getattr(f, "callback", f)
+                if isinstance(obj, Command):
+                    names |= {str(c) for c in obj.commands}
+        return names
+
+    def test_every_menu_command_has_a_handler(self):
+        handled = self._handled()
+        for command in bot_module.COMMANDS:
+            self.assertIn(command.command, handled, f"/{command.command} is in the menu with no handler")
+
+    def test_names_are_valid_for_telegram(self):
+        import re
+
+        for command in bot_module.COMMANDS:
+            self.assertRegex(command.command, r"^[a-z0-9_]{1,32}$")
+            self.assertTrue(command.description.strip())
+            self.assertLessEqual(len(command.description), 256)
+
+    def test_aliases_stay_out_of_the_menu(self):
+        # /help and /donat work, but listing them would show the same thing twice.
+        listed = {c.command for c in bot_module.COMMANDS}
+        self.assertTrue({"help", "donat"}.isdisjoint(listed))
+        self.assertTrue({"help", "donat"} <= self._handled())

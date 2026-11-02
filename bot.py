@@ -19,6 +19,8 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
 from aiogram.types import (
+    BotCommand,
+    BotCommandScopeAllPrivateChats,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     InlineQuery,
@@ -53,16 +55,24 @@ DONATION_NAME = (os.environ.get("DONATION_NAME") or "").strip()
 
 START_TEXT = (
     f"{hbold('Özbekça Yoz')}\n\n"
-    "Eski imlodagi matnni yuboring — yangi özbek lotin alifbosiga "
-    "ögirib beraman.\n\n"
+    "Eski imlodagi matnni yuboring — yangi özbek alifbosida qaytaraman.\n\n"
     f"{hcode(chr(79) + chr(39))} → Ö "
     f"{hcode(chr(71) + chr(39))} → Ğ "
     f"{hcode('Sh')} → Ş "
     f"{hcode('Ch')} → Ç\n\n"
-    "Boşqa hiç narsa özgarmaydi: tiniş belgilari, qatorlar, emojilar "
-    "joyida qoladi.\n\n"
-    "Har qanday çatda ham işlataolasiz — pastdagi tugmani bosing."
+    "Boşqa hiç narsa özgarmaydi. Havola, poçta manzili va @nom ham "
+    "tegilmaydi — uzun maqola, post yoki hisobotni bemalol taşlayvering.\n\n"
+    "Matningiz hiç qayerda saqlanmaydi."
 )
+
+#: The "/" menu, set from here at every startup so it can never drift from
+#: the handlers. /help and /donat still work as aliases; they are left out
+#: of the menu so it does not list the same thing twice.
+COMMANDS = [
+    BotCommand(command="start", description="Boşlaş va qisqa yöriqnoma"),
+    BotCommand(command="yordam", description="Ögiriş jadvali va misollar"),
+    BotCommand(command="homiylik", description="Loyihani qöllab-quvvatlaş"),
+]
 
 HELP_TEXT = (
     f"{hbold('Qanday işlaydi')}\n\n"
@@ -242,8 +252,9 @@ async def main(token: str) -> None:
     )
     # A leftover webhook would stop long polling from ever receiving updates.
     await bot.delete_webhook(drop_pending_updates=True)
+    await bot.set_my_commands(COMMANDS, scope=BotCommandScopeAllPrivateChats())
     me = await bot.me()
-    log.info("starting as @%s", me.username)
+    log.info("starting as @%s, %d commands registered", me.username, len(COMMANDS))
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 
