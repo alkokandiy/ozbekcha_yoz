@@ -6,6 +6,8 @@ bare interpreter. Run them with the deployment interpreter:
     python -m unittest discover -s tests -t .
 """
 
+import contextlib
+import os
 import unittest
 
 try:
@@ -84,18 +86,50 @@ class TestInlineHandler(unittest.IsolatedAsyncioTestCase):
 @unittest.skipIf(bot_module is None, "aiogram not installed")
 class TestTokenReading(unittest.TestCase):
     def test_each_accepted_variable_name(self):
+        valid = "123456789:" + "A" * 35
+        with self._clean_env() as names:
+            for name in names:
+                os.environ[name] = f"  {valid}  "
+                self.assertEqual(bot_module.read_token(), valid)
+                del os.environ[name]
+
+    def test_missing_token_exits(self):
+        with self._clean_env():
+            with self.assertRaises(SystemExit):
+                bot_module.read_token()
+
+    def test_placeholder_token_is_rejected(self):
+        # The value that .env.example used to carry, and that Railway will
+        # happily prefill into a real deployment.
+        for junk in (
+            "123456789:AAExampleTokenReplaceMe",
+            "your-token-here",
+            "changeme",
+            "123456789",
+        ):
+            with self._clean_env():
+                os.environ["BOT_TOKEN"] = junk
+                with self.assertRaises(SystemExit) as caught:
+                    bot_module.read_token()
+                self.assertIn("does not look like", str(caught.exception))
+
+    def test_quoted_token_is_unwrapped(self):
+        valid = "123456789:" + "A" * 35
+        with self._clean_env():
+            os.environ["BOT_TOKEN"] = f'"{valid}"'
+            self.assertEqual(bot_module.read_token(), valid)
+
+    @contextlib.contextmanager
+    def _clean_env(self):
         import os
 
         names = ("BOT_TOKEN", "TELEGRAM_BOT_TOKEN", "TELEGRAM_TOKEN")
         saved = {n: os.environ.pop(n, None) for n in names}
         try:
-            for name in names:
-                os.environ[name] = "  42:token  "
-                self.assertEqual(bot_module.read_token(), "42:token")
-                del os.environ[name]
-            with self.assertRaises(SystemExit):
-                bot_module.read_token()
+            yield names
         finally:
+            for name in names:
+                os.environ.pop(name, None)
             for name, value in saved.items():
                 if value is not None:
                     os.environ[name] = value

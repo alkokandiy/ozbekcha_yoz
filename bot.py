@@ -11,6 +11,7 @@ On Railway:    the Procfile worker starts this file.
 import asyncio
 import logging
 import os
+import re
 import sys
 
 from aiogram import Bot, Dispatcher, F
@@ -141,20 +142,38 @@ async def on_inline(query: InlineQuery) -> None:
     )
 
 
+#: A real token is "<bot id>:<35 character secret>".
+TOKEN_SHAPE = re.compile(r"^\d{5,}:[A-Za-z0-9_-]{30,}$")
+
+
 def read_token() -> str:
+    """Return the bot token, or exit with an explanation.
+
+    A placeholder is rejected as firmly as a missing value. Railway offers to
+    prefill variables from a committed .env.example, so "looks set but is
+    nonsense" is a likelier failure than "not set at all", and Telegram's own
+    answer to it is a bare 401 inside a restart loop.
+    """
     for name in ("BOT_TOKEN", "TELEGRAM_BOT_TOKEN", "TELEGRAM_TOKEN"):
-        token = (os.environ.get(name) or "").strip()
-        if token:
-            return token
+        token = (os.environ.get(name) or "").strip().strip('"' + "'")
+        if not token:
+            continue
+        if not TOKEN_SHAPE.match(token):
+            sys.exit(
+                f"{name} is set but does not look like a Telegram token "
+                f"(expected <digits>:<35 characters>, got {len(token)} "
+                "characters). Replace it with the token from @BotFather."
+            )
+        return token
     sys.exit(
         "BOT_TOKEN is not set. Add it as a Railway variable "
         "(or export it locally) and restart."
     )
 
 
-async def main() -> None:
+async def main(token: str) -> None:
     bot = Bot(
-        token=read_token(),
+        token=token,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
     # A leftover webhook would stop long polling from ever receiving updates.
@@ -165,7 +184,9 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    # Read the token before the event loop starts, so a bad one is reported
+    # by SystemExit's own message instead of being swallowed below.
     try:
-        asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
+        asyncio.run(main(read_token()))
+    except KeyboardInterrupt:
         log.info("stopped")

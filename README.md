@@ -55,8 +55,16 @@ Logs should end with `starting as @your_bot`. Send the bot a message to check.
 ### Variable names
 
 `BOT_TOKEN` is the expected name; `TELEGRAM_BOT_TOKEN` and `TELEGRAM_TOKEN`
-also work. With none of them set the process exits immediately with a message
-saying so, rather than crash-looping silently.
+also work. With none of them set, the process exits immediately with a message
+saying so rather than crash-looping silently.
+
+A token that is set but malformed is refused the same way, by shape, before
+Telegram is contacted. This matters because Railway offers to prefill its
+variables from a committed `.env.example`: a placeholder left in that file
+would otherwise be deployed as though it were a real token, and Telegram's
+only reply is a bare `401 Unauthorized` inside a restart loop. For that reason
+`.env.example` ships with an empty value, and a test enforces that it stays
+empty.
 
 ## Running it locally
 

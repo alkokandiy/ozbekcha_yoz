@@ -107,3 +107,19 @@ class TestRealWords(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestEnvExample(unittest.TestCase):
+    """.env.example is read by Railway's variable prefill, so it must not
+    carry a value that would deploy as a real-looking token."""
+
+    def test_no_placeholder_token_value(self):
+        import pathlib
+
+        path = pathlib.Path(__file__).resolve().parent.parent / ".env.example"
+        for line in path.read_text().splitlines():
+            if line.startswith("BOT_TOKEN"):
+                self.assertEqual(line.strip(), "BOT_TOKEN=")
+                break
+        else:
+            self.fail("BOT_TOKEN line missing from .env.example")
