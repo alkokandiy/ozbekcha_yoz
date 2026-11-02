@@ -96,8 +96,8 @@ def donation_text() -> str:
         )
     grouped = " ".join(digits[i : i + 4] for i in range(0, 16, 4))
     lines = [
-        "Bot bepul va şunday qoladi. Homiylik hiç narsani oçmaydi va "
-        "navbat bermaydi — faqat server haqini qoplaşga yordam beradi.\n",
+        "Botdan foyda olgan bölsangiz yoki mehringiz jöşib ketayotgan "
+        "bölsa — mana:\n",
         hcode(grouped),
     ]
     if DONATION_NAME:
