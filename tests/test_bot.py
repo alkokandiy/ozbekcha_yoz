@@ -327,3 +327,15 @@ class TestUzbekSpelling(unittest.TestCase):
             words = {w.lower() for w in re.findall(r"[\wÖĞŞÇöğşç']+", text)}
             for wrong, right in self.WRONG.items():
                 self.assertNotIn(wrong, words, f"{where}: write {right!r}, not {wrong!r}")
+
+
+@unittest.skipIf(bot_module is None, "aiogram not installed")
+class TestStartupKeepsQueuedUpdates(unittest.TestCase):
+    """A redeploy must not swallow messages sent while the worker restarts."""
+
+    def test_pending_updates_are_not_dropped(self):
+        import inspect
+
+        source = inspect.getsource(bot_module.main)
+        self.assertIn("drop_pending_updates=False", source)
+        self.assertNotIn("drop_pending_updates=True", source)

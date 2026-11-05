@@ -251,7 +251,13 @@ async def main(token: str) -> None:
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
     # A leftover webhook would stop long polling from ever receiving updates.
-    await bot.delete_webhook(drop_pending_updates=True)
+    #
+    # drop_pending_updates stays False. Telegram holds undelivered messages
+    # for about 24 hours, so anything sent while the worker restarts is
+    # answered once polling resumes. Dropping them would make a redeploy
+    # look, to whoever sent a long article during it, exactly like a bot
+    # that ignores you — and a late conversion is still the text they wanted.
+    await bot.delete_webhook(drop_pending_updates=False)
     await bot.set_my_commands(COMMANDS, scope=BotCommandScopeAllPrivateChats())
     me = await bot.me()
     log.info("starting as @%s, %d commands registered", me.username, len(COMMANDS))
