@@ -1,0 +1,33 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The versions the bot is actually deployed on. 3.14 is left out
+        # until pydantic-core, an aiogram dependency, ships a wheel for it.
+        python: ["3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Run the suite, counting a skip as a failure
+        run: python run_tests.py
+
+      - name: Check the modules parse
+        run: python -m compileall -q bot.py yoz run_tests.py

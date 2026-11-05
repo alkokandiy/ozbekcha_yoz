@@ -2,6 +2,12 @@
   <img src="brand/logo-full.png" alt="Özbekça Yoz" width="260">
 </p>
 
+<p align="center">
+  <a href="https://github.com/alkokandiy/ozbekcha_yoz/actions/workflows/tests.yml">
+    <img src="https://github.com/alkokandiy/ozbekcha_yoz/actions/workflows/tests.yml/badge.svg" alt="tests">
+  </a>
+</p>
+
 # Özbekça Yoz
 
 Telegram bot that rewrites text from the old Uzbek Latin orthography (1995)
@@ -124,8 +130,14 @@ python -m yoz < old.txt > new.txt
 No dependencies — the converter is pure standard library:
 
 ```bash
-python -m unittest discover -s tests -t .
+python run_tests.py
 ```
+
+Use `run_tests.py`, not `python -m unittest` directly. Without aiogram
+installed, unittest prints `OK (skipped=22)` and exits 0 — the handler,
+command-menu, donation and spelling tests never run, and the output still
+says OK. `run_tests.py` treats a skip as a failure, and CI runs it on 3.12
+and 3.13 for every push.
 
 They cover the spec example, all three case forms, all eight apostrophe
 variants, structure preservation, idempotency (converting twice changes

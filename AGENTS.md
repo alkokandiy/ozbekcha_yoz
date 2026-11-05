@@ -26,9 +26,14 @@ A Telegram bot that converts old Uzbek Latin orthography (1995) to the
 ## Checks before any commit
 
 ```bash
-python -m unittest discover -s tests -t .
-python -c "import ast;[ast.parse(open(f).read()) for f in ['bot.py','yoz/converter.py']]"
+python run_tests.py
 ```
+
+**Never report the suite green from `python -m unittest` alone.** Without
+aiogram it prints `OK (skipped=22)` and exits 0, so twenty-two tests are
+reported as success while never running. `run_tests.py` fails on a skip.
+If it tells you to install dependencies, install them — do not "verify" the
+change by reading the skipped output.
 
 Add a test for every behaviour change, including the edge cases
 (`san'at`, `is'hoq`, `ischi`, mixed case, emojis, code fences).
