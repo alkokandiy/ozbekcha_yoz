@@ -17,7 +17,7 @@ import sys
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.types import (
     BotCommand,
     BotCommandScopeAllPrivateChats,
@@ -41,6 +41,12 @@ log = logging.getLogger("yoz.bot")
 
 #: Telegram's hard limit for one text message.
 MAX_MESSAGE = 4096
+
+#: Telegram truncates an inline query at 256 characters before the bot is
+#: ever called, so the rest of a long paragraph never arrives and nothing
+#: here can raise it. All the bot can do is notice and say so, rather than
+#: hand back half a sentence that looks complete.
+INLINE_QUERY_LIMIT = 256
 
 #: The FAQ page, served from docs/ by GitHub Pages.
 SITE_URL = "https://alkokandiy.github.io/ozbekcha_yoz/"
@@ -96,6 +102,32 @@ HELP_TEXT = (
     "dasturçida şunça matnni saqlab turadigan server olişga pul yöq."
 )
 
+def user_facing_texts() -> "dict[str, str]":
+    """Every string a user can read, in one place.
+
+    The spelling guards iterate this, so a new string is covered the moment
+    it is added here — which is the only way the inline titles stopped being
+    the one corner nothing checked.
+    """
+    texts = {
+        "START_TEXT": START_TEXT,
+        "LONG_TEXT_NOTE": LONG_TEXT_NOTE,
+        "HELP_TEXT": HELP_TEXT,
+        "donation": donation_text(),
+        "INLINE_TITLE": INLINE_TITLE,
+        "INLINE_TITLE_CUT": INLINE_TITLE_CUT,
+        "INLINE_DESC_CUT": INLINE_DESC_CUT,
+        "INLINE_BUTTON_CUT": INLINE_BUTTON_CUT,
+        "INLINE_BUTTON_EMPTY": INLINE_BUTTON_EMPTY,
+    }
+    for command in COMMANDS:
+        texts[f"/{command.command}"] = command.description
+    for row in start_keyboard().inline_keyboard:
+        for button in row:
+            texts[f"button {button.text!r}"] = button.text
+    return texts
+
+
 def start_keyboard() -> InlineKeyboardMarkup:
     """Buttons under /start.
 
@@ -136,13 +168,25 @@ def donation_text() -> str:
 dp = Dispatcher()
 
 
+INLINE_TITLE = "Yangi alifboda yuboriş"
+INLINE_TITLE_CUT = "⚠️ Matn kesilgan — faqat birinçi 256 belgi"
+INLINE_DESC_CUT = "Telegram çegarasi. Töliq matn uçun botni oçing."
+INLINE_BUTTON_CUT = "Uzun matn uçun botni oçiş"
+INLINE_BUTTON_EMPTY = "Ögirmoqçi bölgan matnni yozing"
+
+LONG_TEXT_NOTE = (
+    "Boşqa çatlarda Telegram 256 belgidan köpini ötkazmaydi — uzun matnni "
+    "şu yerga yuboring, kesilmaydi.\n\n"
+)
+
+
 @dp.message(CommandStart())
-async def on_start(message: Message) -> None:
+async def on_start(message: Message, command: CommandObject) -> None:
     me = await message.bot.me()
-    await message.answer(
-        START_TEXT.replace("bot_username", me.username or "bot"),
-        reply_markup=start_keyboard(),
-    )
+    text = START_TEXT.replace("bot_username", me.username or "bot")
+    if (command.args or "") == "uzun":
+        text = LONG_TEXT_NOTE + text
+    await message.answer(text, reply_markup=start_keyboard())
 
 
 @dp.message(Command("help", "yordam"))
@@ -192,19 +236,21 @@ async def on_inline(query: InlineQuery) -> None:
             cache_time=5,
             is_personal=True,
             button=InlineQueryResultsButton(
-                text="Ögirmoqçi bölgan matnni yozing",
+                text=INLINE_BUTTON_EMPTY,
                 start_parameter="start",
             ),
         )
         return
 
     result = convert(source)
+    cut = len(source) >= INLINE_QUERY_LIMIT
+
     await query.answer(
         [
             InlineQueryResultArticle(
                 id="yoz",
-                title="Yangi alifboda yuboriş",
-                description=result[:120],
+                title=INLINE_TITLE_CUT if cut else INLINE_TITLE,
+                description=INLINE_DESC_CUT if cut else result[:120],
                 input_message_content=InputTextMessageContent(
                     message_text=result[:MAX_MESSAGE],
                     parse_mode=None,
@@ -213,6 +259,14 @@ async def on_inline(query: InlineQuery) -> None:
         ],
         cache_time=0,
         is_personal=True,
+        button=(
+            InlineQueryResultsButton(
+                text=INLINE_BUTTON_CUT,
+                start_parameter="uzun",
+            )
+            if cut
+            else None
+        ),
     )
 
 

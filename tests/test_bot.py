@@ -75,6 +75,33 @@ class TestInlineHandler(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIsNone(results[0].input_message_content.parse_mode)
 
+    async def test_long_query_is_flagged_as_cut(self):
+        # Telegram truncates at 256 before the bot sees anything, so the only
+        # defence is saying so instead of returning half a sentence.
+        query = StubInlineQuery("Toshkent shahri " * 20)
+        self.assertGreaterEqual(len(query.query), bot_module.INLINE_QUERY_LIMIT)
+        await bot_module.on_inline(query)
+        results, kwargs = query.answered
+        self.assertEqual(results[0].title, bot_module.INLINE_TITLE_CUT)
+        self.assertEqual(kwargs["button"].text, bot_module.INLINE_BUTTON_CUT)
+        self.assertEqual(kwargs["button"].start_parameter, "uzun")
+
+    async def test_short_query_is_not_flagged(self):
+        query = StubInlineQuery("Toshkent shahri")
+        await bot_module.on_inline(query)
+        results, kwargs = query.answered
+        self.assertEqual(results[0].title, bot_module.INLINE_TITLE)
+        self.assertIsNone(kwargs["button"])
+
+    async def test_truncation_never_alters_the_text_itself(self):
+        source = "Toshkent shahri " * 20
+        query = StubInlineQuery(source)
+        await bot_module.on_inline(query)
+        results, _ = query.answered
+        from yoz import convert
+
+        self.assertEqual(results[0].input_message_content.message_text, convert(source))
+
     async def test_empty_query_offers_the_prompt_button(self):
         query = StubInlineQuery("")
         await bot_module.on_inline(query)
@@ -221,18 +248,7 @@ class TestBotSpeaksTheNewAlphabet(unittest.TestCase):
     def test_every_reply_is_already_converted(self):
         from yoz import convert
 
-        texts = {
-            "START_TEXT": bot_module.START_TEXT,
-            "HELP_TEXT": bot_module.HELP_TEXT,
-            "donation (unset)": bot_module.donation_text(),
-        }
-        for row in bot_module.start_keyboard().inline_keyboard:
-            for button in row:
-                texts[f"button {button.text!r}"] = button.text
-        for command in bot_module.COMMANDS:
-            texts[f"/{command.command}"] = command.description
-
-        for where, text in texts.items():
+        for where, text in bot_module.user_facing_texts().items():
             for line in self._prose_lines(text):
                 self.assertEqual(convert(line), line, f"old orthography in {where}: {line!r}")
 
@@ -305,16 +321,7 @@ class TestUzbekSpelling(unittest.TestCase):
         import pathlib
         import re
 
-        texts = {
-            "START_TEXT": bot_module.START_TEXT,
-            "HELP_TEXT": bot_module.HELP_TEXT,
-            "donation": bot_module.donation_text(),
-        }
-        for command in bot_module.COMMANDS:
-            texts[f"/{command.command}"] = command.description
-        for row in bot_module.start_keyboard().inline_keyboard:
-            for button in row:
-                texts[f"button {button.text!r}"] = button.text
+        texts = dict(bot_module.user_facing_texts())
         page = pathlib.Path(__file__).resolve().parent.parent / "docs" / "index.html"
         body = re.sub(r"<(script|style).*?</\1>", "", page.read_text(), flags=re.S)
         texts["FAQ page"] = re.sub(r"<[^>]+>", " ", body)
