@@ -90,8 +90,17 @@ class TestInlineHandler(unittest.IsolatedAsyncioTestCase):
         query = StubInlineQuery("Toshkent shahri")
         await bot_module.on_inline(query)
         results, kwargs = query.answered
-        self.assertEqual(results[0].title, bot_module.INLINE_TITLE)
+        self.assertTrue(results[0].title.startswith(bot_module.INLINE_TITLE))
         self.assertIsNone(kwargs["button"])
+
+    async def test_title_reports_how_much_text_arrived(self):
+        # The count is of what Telegram delivered, so it answers "did all of
+        # my text get here" rather than "how long is the output".
+        source = "Toshkent shahridagi choyxona"
+        query = StubInlineQuery(source)
+        await bot_module.on_inline(query)
+        results, _ = query.answered
+        self.assertIn(f"{len(source)} belgi", results[0].title)
 
     async def test_truncation_never_alters_the_text_itself(self):
         source = "Toshkent shahri " * 20
@@ -346,3 +355,27 @@ class TestStartupKeepsQueuedUpdates(unittest.TestCase):
         source = inspect.getsource(bot_module.main)
         self.assertIn("drop_pending_updates=False", source)
         self.assertNotIn("drop_pending_updates=True", source)
+
+
+@unittest.skipIf(bot_module is None, "aiogram not installed")
+class TestPreview(unittest.TestCase):
+    """The card description is the only thing a user sees before sending."""
+
+    def test_short_text_is_untouched(self):
+        self.assertEqual(bot_module.preview("Toşkent şahri"), "Toşkent şahri")
+
+    def test_long_text_cuts_on_a_space_not_mid_word(self):
+        out = bot_module.preview("Şerlock Holmes is a real, trainable skill " * 5)
+        self.assertTrue(out.endswith("…"))
+        self.assertFalse(out[:-1].endswith(" "))
+        # The giveaway bug: a raw slice ended "trainab".
+        self.assertNotIn("trainab…", out)
+        self.assertIn(" ", out)
+
+    def test_newlines_become_spaces(self):
+        self.assertEqual(bot_module.preview("bir\nikki\n\nuç"), "bir ikki uç")
+
+    def test_never_longer_than_the_limit_plus_ellipsis(self):
+        for n in (1, 50, 109, 110, 111, 400):
+            out = bot_module.preview("söz " * n)
+            self.assertLessEqual(len(out), 111, n)

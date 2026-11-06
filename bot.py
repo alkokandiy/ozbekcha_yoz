@@ -102,6 +102,19 @@ HELP_TEXT = (
     "dasturçida şunça matnni saqlab turadigan server olişga pul yöq."
 )
 
+def preview(text: str, limit: int = 110) -> str:
+    """A one-line preview for the result card.
+
+    Telegram renders the description on about two lines, so a raw slice ends
+    mid-word ("a real, trainab") and reads like the conversion itself broke.
+    Cut on a space instead, and mark the cut with an ellipsis.
+    """
+    flat = " ".join(text.split())
+    if len(flat) <= limit:
+        return flat
+    return flat[:limit].rsplit(" ", 1)[0] + "…"
+
+
 def user_facing_texts() -> "dict[str, str]":
     """Every string a user can read, in one place.
 
@@ -169,8 +182,8 @@ dp = Dispatcher()
 
 
 INLINE_TITLE = "Yangi alifboda yuboriş"
-INLINE_TITLE_CUT = "⚠️ Matn kesilgan — faqat birinçi 256 belgi"
-INLINE_DESC_CUT = "Telegram çegarasi. Töliq matn uçun botni oçing."
+INLINE_TITLE_CUT = "⚠️ Telegram 256 belgida kesdi"
+INLINE_DESC_CUT = "Matnning qolgani botga yetib kelmadi. Botni oçing."
 INLINE_BUTTON_CUT = "Uzun matn uçun botni oçiş"
 INLINE_BUTTON_EMPTY = "Ögirmoqçi bölgan matnni yozing"
 
@@ -249,8 +262,14 @@ async def on_inline(query: InlineQuery) -> None:
         [
             InlineQueryResultArticle(
                 id="yoz",
-                title=INLINE_TITLE_CUT if cut else INLINE_TITLE,
-                description=INLINE_DESC_CUT if cut else result[:120],
+                title=(
+                    INLINE_TITLE_CUT
+                    if cut
+                    # The source length, not the converted one: the question
+                    # being answered is "did all of my text reach the bot".
+                    else f"{INLINE_TITLE} · {len(source)} belgi"
+                ),
+                description=INLINE_DESC_CUT if cut else preview(result),
                 input_message_content=InputTextMessageContent(
                     message_text=result[:MAX_MESSAGE],
                     parse_mode=None,
